@@ -1,5 +1,6 @@
-import { PropsWithChildren, useState } from "react";
-import { Button, Form, Modal, Row } from "react-bootstrap";
+import { PropsWithChildren, useContext, useState } from "react";
+import { Button, Card, Form, Modal, Row } from "react-bootstrap";
+import { UserContext } from "../../context/AdminContext";
 
 // TYPES
 type Props = PropsWithChildren<{
@@ -9,11 +10,17 @@ type Props = PropsWithChildren<{
 }>;
 type PropsSign = PropsWithChildren<{
   sign: string;
+  closeModal: Function;
+}>;
+type PropsLog = PropsWithChildren<{
+  closeModal: Function;
 }>;
 
-/****    COMPONENT Forms SignIn & SignUp    ****/
-function FormSign({ sign }: PropsSign) {
-  // Fields
+/****   Forms SignIn & SignUp    ****/
+function FormSign({ sign, closeModal }: PropsSign) {
+  // Context
+  const { userLog, toggleLog } = useContext(UserContext);
+  // States
   const [formSign, setFormSign] = useState({
     name: "",
     email: "",
@@ -21,10 +28,10 @@ function FormSign({ sign }: PropsSign) {
     confirmPwd: "",
   });
 
+  // Handles
   const handleInputs = (ev: any) => {
     setFormSign({ ...formSign, [ev.target.id]: ev.target.value });
   };
-
   const handleReset = () => {
     setFormSign({
       name: "",
@@ -33,9 +40,20 @@ function FormSign({ sign }: PropsSign) {
       confirmPwd: "",
     });
   };
+  const handleSubmit = (ev: any) => {
+    ev.preventDefault();
+    if (sign === "signin") {
+      toggleLog("loggin", !userLog.loggin);
+    }
+
+    if (sign === "signup") {
+      toggleLog("admin", !userLog.admin);
+    }
+    closeModal();
+  };
 
   return (
-    <Form>
+    <Form onSubmit={(e) => handleSubmit(e)}>
       {/* only SignIn */}
       {sign !== "signup" && (
         <Form.Group>
@@ -122,8 +140,49 @@ function FormSign({ sign }: PropsSign) {
   );
 }
 
-/****    COMPONENT Modals SignIn & SignUp    ****/
-function SignInModal({ show, sign, close }: Props) {
+/*****      Form Loggout     *****/
+function FormLoggout({ closeModal }: PropsLog) {
+  // Context
+  const { userLog, toggleLog } = useContext(UserContext);
+
+  // Handle
+  const handleLoggout = (ev: any) => {
+    ev.preventDefault();
+    if (userLog.loggin) {
+      toggleLog("loggin", false);
+    }
+    if (userLog.admin) {
+      toggleLog("admin", false);
+    }
+    closeModal();
+  };
+
+  return (
+    <Form onSubmit={(ev) => handleLoggout(ev)}>
+      <Row>
+        <Card.Text>Etes-vous sûr de vouloir nous quitter ?</Card.Text>
+      </Row>
+      <Row className="justify-content-evenly mt-4">
+        <Button
+          className="col-4"
+          variant="danger"
+          type="reset"
+          onClick={() => closeModal()}
+        >
+          Retour
+        </Button>
+
+        <Button className="col-4" variant="primary" type="submit">
+          Déconnecter
+        </Button>
+      </Row>
+    </Form>
+  );
+}
+
+/****    Modals SignIn & SignUp & Loggout    ****/
+export default function SignInModal({ show, sign, close }: Props) {
+  // Handle
   const handleClose = () => close();
 
   return (
@@ -134,16 +193,18 @@ function SignInModal({ show, sign, close }: Props) {
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-          {sign === "signin" ? "S'inscrire" : "Se connecter"}
-        </Modal.Title>
+        {sign !== "loggout" && (
+          <Modal.Title>
+            {sign === "signin" ? "S'inscrire" : "Se connecter"}
+          </Modal.Title>
+        )}
+        {sign === "loggout" && <Modal.Title>Se deconnecter</Modal.Title>}
       </Modal.Header>
 
       <Modal.Body>
-        <FormSign sign={sign} />
+        {sign !== "loggout" && <FormSign sign={sign} closeModal={close} />}
+        {sign === "loggout" && <FormLoggout closeModal={close} />}
       </Modal.Body>
     </Modal>
   );
 }
-
-export default SignInModal;

@@ -1,9 +1,23 @@
-import React, { useState } from "react";
-import { Button, Card, Col, Form, InputGroup, Row } from "react-bootstrap";
-import soapImg from "../assets/images/05821-small.jpg";
+import React, { PropsWithChildren, useState } from "react";
+import { Button, Card, Col, InputGroup, Row } from "react-bootstrap";
+import ImgModal from "./ImgModal";
 
+// TYPES
+type PropsCard = PropsWithChildren<{
+  title: string;
+  quantGr: string;
+  textDescription: string;
+  arrayCompo: string[];
+  price: string;
+  img: any;
+}>;
+
+/*****      ADD TO COMMAND     *****/
 function AddCard() {
+  // State
   const [card, setCard] = useState(0);
+
+  // Handles
   const handleItems = (params: string) => {
     switch (params) {
       case "+":
@@ -17,12 +31,15 @@ function AddCard() {
         break;
     }
   };
+
   return (
-    <InputGroup className="inline-flex">
+    <InputGroup className="d-block">
       <Button variant="outline-info" onClick={() => handleItems("+")}>
         +
       </Button>
+
       <Button variant="info">{"Ajouter " + card}</Button>
+
       <Button
         variant="outline-info"
         onClick={() => handleItems("-")}
@@ -34,25 +51,40 @@ function AddCard() {
   );
 }
 
-function SoapCard() {
+/*****      CARD SOAP     *****/
+export default function SoapCard({
+  title,
+  quantGr,
+  textDescription,
+  arrayCompo,
+  price,
+  img,
+}: PropsCard) {
+  // States
   const [details, setDetails] = useState(false);
-  const compo = ["sodium", "palmate", "aqua", "glycerin"];
+  const [activeImg, setActiveImg] = useState(false);
+
+  // Handle
+  const toggleImg = () => {
+    setActiveImg(!activeImg);
+  };
 
   return (
-    <Card className="container col-3 px-1 m-1">
+    <Card
+      style={{ width: "20%", minWidth: "250px" }}
+      className="container col-auto px-1 m-1"
+    >
       <Card.Body>
-        <Card.Title>SAVON CITRON</Card.Title>
+        <Card.Title>{title}</Card.Title>
 
         <Card.Text style={{ display: !details ? "none" : "inline" }}>
-          100 g
+          {quantGr + "  g"}
         </Card.Text>
 
-        <Card.Img variant="top" src={soapImg} />
+        <Card.Img variant="top" src={img} onClick={() => toggleImg()} />
 
-        <Card.Text className="">
-          Authentique et traditionnel, le savon citron est enrichi d'huile
-          végétale.
-        </Card.Text>
+        <Card.Text className="">{textDescription}</Card.Text>
+
         <Card.Link
           className="d-block pb-3"
           onClick={() => setDetails(!details)}
@@ -62,21 +94,20 @@ function SoapCard() {
 
         <Card.Text style={{ display: !details ? "none" : "inline" }}>
           <span className="d-block pt-3">Composition</span>
-          <span>{compo.map((item) => item).join(", ")}</span>
+          <span>{arrayCompo.map((item) => item).join(", ")}</span>
         </Card.Text>
 
         <Row className="pb-2">
-          <Col>3,80 €</Col>
-          <Col className="text-muted">(3,17 € HT)</Col>
+          <Col>{price + "  €"}</Col>
+          <Col className="text-muted">{price + "  €  HT"}</Col>
         </Row>
 
-        <Row className="align-center">
+        <Row className="">
           <AddCard />
-          <Form.Check type="checkbox" label="Favories" />
         </Row>
+
+        <ImgModal show={activeImg} img={img} title={title} close={toggleImg} />
       </Card.Body>
     </Card>
   );
 }
-
-export default SoapCard;

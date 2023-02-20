@@ -1,16 +1,19 @@
 import React from "react";
-import { Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { products } from "../assets/products";
 import SoapCard from "../components/SoapCard";
 
-function ListProducts() {
-  const urlParams = useParams();
-  console.log(urlParams);
+/*****      VIEW SEARCH PRODUCTS     *****/
+export default function SearchProducts() {
+  const { categories }: any = useParams();
+
+  const array = () => {
+    return products.filter((cat) => cat.categorie.includes(categories));
+  };
 
   return (
-    <Row className="container row justify-content-evenly">
-      {products.map((soap: any, id: number) => (
+    <div className="container row justify-content-evenly">
+      {array().map((soap: any, id: number) => (
         <SoapCard
           key={id}
           title={soap.title}
@@ -21,8 +24,6 @@ function ListProducts() {
           img={soap.img}
         />
       ))}
-    </Row>
+    </div>
   );
 }
-
-export default ListProducts;
